@@ -57,12 +57,11 @@ function calcCourtFee(amount: number): number {
 
     if (segmentAmount > 0) {
       if (b.fixed) {
-        total = b.fixed;
-        remaining = 0;
+        total += b.fixed;
       } else {
         total += segmentAmount * b.rate;
-        remaining -= segmentAmount;
       }
+      remaining -= segmentAmount;
     }
   }
 

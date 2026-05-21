@@ -50,6 +50,7 @@ export async function POST(request: Request) {
     }
 
     await writeFile(envPath, updated, "utf-8");
+    process.env.ADMIN_PASSWORD = newPassword;
 
     return NextResponse.json({ success: true });
   } catch (error) {
