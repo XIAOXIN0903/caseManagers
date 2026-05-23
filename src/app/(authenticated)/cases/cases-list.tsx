@@ -38,9 +38,14 @@ type CaseItem = NonNullable<
 const statusColors: Record<string, string> = {
   "立案": "bg-blue-100 text-blue-800",
   "审理": "bg-yellow-100 text-yellow-800",
-  "判决": "bg-orange-100 text-orange-800",
+  "一审判决": "bg-orange-100 text-orange-800",
+  "二审判决": "bg-orange-200 text-orange-900",
+  "再审": "bg-red-100 text-red-800",
   "执行": "bg-purple-100 text-purple-800",
+  "调解": "bg-teal-100 text-teal-800",
+  "撤诉": "bg-gray-100 text-gray-800",
   "结案": "bg-green-100 text-green-800",
+  "已结委托": "bg-slate-200 text-slate-700",
 };
 
 const PAGE_SIZE = 10;

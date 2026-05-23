@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-export const CASE_STATUSES = ["立案", "审理", "判决", "执行", "结案"] as const;
+export const CASE_STATUSES = [
+  "立案", "审理", "一审判决", "二审判决", "再审",
+  "执行", "调解", "撤诉", "结案", "已结委托",
+] as const;
 
 export const LITIGATION_STATUSES = [
   "原告", "被告", "反诉原告", "反诉被告", "第三人",

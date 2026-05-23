@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Key, Download, Upload, MonitorDown, Database, Trash2 } from "lucide-react";
+import { Key, Download, Upload, MonitorDown, Database, Trash2, FileDown, Table2 } from "lucide-react";
 
 export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -16,8 +16,15 @@ export default function SettingsPage() {
   const [changing, setChanging] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [restoring, setRestoring] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
   const [installable, setInstallable] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{
+    total: number;
+    imported: number;
+    errors?: { row: number; message: string }[];
+  } | null>(null);
 
   // Listen for beforeinstallprompt
   useEffect(() => {
@@ -134,6 +141,52 @@ export default function SettingsPage() {
     }
   }
 
+  function handleDownloadTemplate() {
+    const a = document.createElement("a");
+    a.href = "/api/import-template";
+    a.download = "案件导入模板.xlsx";
+    a.click();
+    toast.success("模板下载中...");
+  }
+
+  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImporting(true);
+    setImportResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/import", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success(`成功导入 ${data.data.imported} 条案件`);
+        setImportResult({
+          total: data.data.total,
+          imported: data.data.imported,
+          errors: data.data.errors,
+        });
+      } else {
+        toast.error(data.error || "导入失败");
+        if (data.details) {
+          setImportResult(data.details);
+        }
+      }
+    } catch {
+      toast.error("网络错误，请重试");
+    } finally {
+      setImporting(false);
+      e.target.value = "";
+    }
+  }
+
   return (
     <div className="space-y-6 max-w-lg">
       <h1 className="text-2xl font-bold">设置</h1>
@@ -158,6 +211,77 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Batch Import */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Table2 className="h-4 w-4" />
+            批量导入案件
+          </CardTitle>
+          <CardDescription>
+            下载 Excel 模板，按要求填写案件信息后上传导入
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-sm font-medium mb-1">第一步：下载模板</p>
+            <p className="text-xs text-muted-foreground mb-2">
+              模板含所有字段的表头和示例数据，按格式填写即可
+            </p>
+            <Button variant="outline" onClick={handleDownloadTemplate}>
+              <FileDown className="h-4 w-4 mr-2" />
+              下载 Excel 模板
+            </Button>
+          </div>
+          <Separator />
+          <div>
+            <p className="text-sm font-medium mb-1">第二步：上传导入</p>
+            <p className="text-xs text-muted-foreground mb-2">
+              上传填写好的 Excel 文件（.xlsx），系统会自动创建案件和当事人
+            </p>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importing}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {importing ? "导入中..." : "选择 Excel 文件"}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleImport}
+                disabled={importing}
+                className="sr-only"
+              />
+            </div>
+          </div>
+
+          {/* Import Result */}
+          {importResult && (
+            <div className={`rounded-md p-3 text-sm ${importResult.errors && importResult.errors.length > 0 ? "bg-yellow-50 border border-yellow-200" : "bg-green-50 border border-green-200"}`}>
+              <p className="font-medium mb-1">
+                共 {importResult.total} 行，成功导入 {importResult.imported} 条
+                {importResult.errors && importResult.errors.length > 0 && (
+                  <span className="text-yellow-700">，{importResult.errors.length} 行失败</span>
+                )}
+              </p>
+              {importResult.errors && importResult.errors.length > 0 && (
+                <ul className="mt-2 space-y-1 text-xs text-muted-foreground max-h-40 overflow-auto">
+                  {importResult.errors.map((err, i) => (
+                    <li key={i}>
+                      第 {err.row} 行：{err.message}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Change Password */}
       <Card>
