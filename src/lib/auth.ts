@@ -6,7 +6,6 @@ const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "dev-secret-change-in-production"
 );
 const COOKIE_NAME = "auth-token";
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 export async function createToken(password: string): Promise<string> {
   const adminPassword = process.env.ADMIN_PASSWORD;
@@ -44,7 +43,6 @@ export async function setAuthCookie(token: string): Promise<void> {
     secure: process.env.NODE_ENV === "production" && !process.env.FORCE_INSECURE,
     sameSite: "lax",
     path: "/",
-    maxAge: COOKIE_MAX_AGE,
   });
 }
 

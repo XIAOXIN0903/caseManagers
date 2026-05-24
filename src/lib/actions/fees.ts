@@ -51,6 +51,7 @@ export async function createFee(
       .values({ case_id: caseId, ...parsed })
       .returning();
     revalidatePath(`/cases/${caseId}`);
+    revalidatePath("/dashboard");
     return { success: true, data: result[0] };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -78,6 +79,7 @@ export async function updateFee(
       .returning();
     if (result.length === 0) return { success: false, error: "记录不存在" };
     revalidatePath(`/cases/${caseId}`);
+    revalidatePath("/dashboard");
     return { success: true, data: result[0] };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -98,6 +100,7 @@ export async function deleteFee(
   try {
     await db.delete(feeRecords).where(eq(feeRecords.id, id));
     revalidatePath(`/cases/${caseId}`);
+    revalidatePath("/dashboard");
     return { success: true };
   } catch {
     return { success: false, error: "操作失败，请重试" };

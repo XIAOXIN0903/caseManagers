@@ -12,6 +12,7 @@ import {
   Search,
   Settings,
   LogOut,
+  Trash2,
 } from "lucide-react"
 
 const navItems = [
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/calendar", label: "日历", icon: Calendar },
   { href: "/calculator", label: "计算器", icon: Calculator },
   { href: "/search", label: "搜索", icon: Search },
+  { href: "/recycle-bin", label: "回收站", icon: Trash2 },
   { href: "/settings", label: "设置", icon: Settings },
 ]
 

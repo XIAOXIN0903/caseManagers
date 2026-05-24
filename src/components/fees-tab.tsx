@@ -28,6 +28,7 @@ import {
   updateFee,
   deleteFee,
 } from "@/lib/actions/fees";
+import { PreviewButton } from "@/components/file-preview";
 
 type Fee = NonNullable<Awaited<ReturnType<typeof getFees>>["data"]>[number];
 
@@ -202,14 +203,9 @@ export function FeesTab({ caseId }: { caseId: number }) {
                     {f.notes || ""}
                   </p>
                   {f.invoice_url && (
-                    <a
-                      href={f.invoice_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-xs text-blue-600 hover:underline"
-                    >
-                      查看发票
-                    </a>
+                    <div className="mt-1">
+                      <PreviewButton url={f.invoice_url} fileName="发票" />
+                    </div>
                   )}
                 </div>
                 <div className="flex gap-1 shrink-0">

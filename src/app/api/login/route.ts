@@ -1,8 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createToken } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+function getClientIp(request: NextRequest): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0].trim();
+  const realIp = request.headers.get("x-real-ip");
+  if (realIp) return realIp;
+  return "127.0.0.1";
+}
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const rateCheck = checkRateLimit(ip);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, error: rateCheck.message },
+        { status: 429 }
+      );
+    }
+
     const { password } = await request.json();
 
     if (!password || typeof password !== "string") {
@@ -20,7 +38,6 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === "production" && !process.env.FORCE_INSECURE,
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7,
     });
 
     return response;

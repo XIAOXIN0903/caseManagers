@@ -1,7 +1,7 @@
 "use server";
 
 import { isNull, not } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { db, tursoClient } from "@/lib/db";
 import { cases, parties, reminders, communicationLogs } from "@/lib/schema";
 import { requireAuth } from "@/lib/auth";
 import type { ActionResult } from "@/lib/auth-types";
@@ -66,21 +66,10 @@ export async function restoreItem(
     const config = tableConfigs.find((c) => c.name === table);
     if (!config) return { success: false, error: "未知表名" };
 
-    await db
-      .update(config.table)
-      .set({ deleted_at: null } as never)
-      .where(
-        not(isNull(config.table.deleted_at))
-      ) as never;
-
-    // More precise: update where id matches
-    // Since drizzle doesn't support dynamic table references easily, use raw SQL
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const anyDb = db as any;
-    await anyDb.run(
-      `UPDATE ${table} SET deleted_at = NULL WHERE id = ?`,
-      [id]
-    );
+    await tursoClient.execute({
+      sql: `UPDATE ${table} SET deleted_at = NULL WHERE id = ?`,
+      args: [id],
+    });
 
     revalidatePath("/recycle-bin");
     return { success: true };
@@ -98,9 +87,10 @@ export async function permanentDelete(
     const config = tableConfigs.find((c) => c.name === table);
     if (!config) return { success: false, error: "未知表名" };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const anyDb = db as any;
-    await anyDb.run(`DELETE FROM ${table} WHERE id = ?`, [id]);
+    await tursoClient.execute({
+      sql: `DELETE FROM ${table} WHERE id = ?`,
+      args: [id],
+    });
 
     revalidatePath("/recycle-bin");
     return { success: true };

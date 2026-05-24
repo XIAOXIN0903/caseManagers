@@ -84,8 +84,15 @@ export async function getDashboardData(): Promise<ActionResult<DashboardData>> {
       .orderBy(cases.updated_at)
       .limit(5);
 
-    // Fee summary
-    const allFees = await db.select().from(feeRecords);
+    // Fee summary — only for non-deleted cases
+    const allFees = await db
+      .select({
+        amount: feeRecords.amount,
+        payment_status: feeRecords.payment_status,
+      })
+      .from(feeRecords)
+      .innerJoin(cases, eq(feeRecords.case_id, cases.id))
+      .where(notDeleted(cases));
 
     const totalReceived = allFees
       .filter((f) => f.payment_status === "已收")

@@ -7,7 +7,7 @@ const JWT_SECRET = new TextEncoder().encode(
 );
 
 const publicPaths = ["/login", "/favicon.ico", "/manifest.webmanifest"];
-const publicPrefixes = ["/_next/", "/api/", "/icons/", "/sw.js"];
+const publicPrefixes = ["/_next/", "/api/", "/icons/", "/sw.js", "/uploads/"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

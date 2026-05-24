@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { LogOut, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DesktopNav, MobileNavSheet, BottomNav } from "@/components/nav-links";
+import SessionTimeout from "@/components/session-timeout";
 
 export default async function AuthenticatedLayout({
   children,
@@ -19,6 +20,17 @@ export default async function AuthenticatedLayout({
 
   return (
     <div className="flex min-h-screen">
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            if (!sessionStorage.getItem("session-active")) {
+              document.cookie = "auth-token=; path=/; max-age=0";
+              window.location.replace("/login");
+            }
+          `,
+        }}
+      />
+      <SessionTimeout />
       {/* Desktop sidebar */}
       <aside className="hidden md:flex md:w-56 md:flex-col md:fixed md:inset-y-0 border-r bg-card">
         <div className="flex items-center h-14 px-4 border-b">

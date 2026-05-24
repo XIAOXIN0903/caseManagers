@@ -19,9 +19,30 @@ export async function POST(request: Request) {
       );
     }
 
-    if (newPassword.length < 4) {
+    if (newPassword.length < 8) {
       return NextResponse.json(
-        { success: false, error: "新密码至少需要4位" },
+        { success: false, error: "新密码至少需要 8 位" },
+        { status: 400 }
+      );
+    }
+
+    if (!/[a-z]/.test(newPassword)) {
+      return NextResponse.json(
+        { success: false, error: "新密码必须包含至少一个小写字母" },
+        { status: 400 }
+      );
+    }
+
+    if (!/[A-Z]/.test(newPassword)) {
+      return NextResponse.json(
+        { success: false, error: "新密码必须包含至少一个大写字母" },
+        { status: 400 }
+      );
+    }
+
+    if (!/[0-9]/.test(newPassword)) {
+      return NextResponse.json(
+        { success: false, error: "新密码必须包含至少一个数字" },
         { status: 400 }
       );
     }

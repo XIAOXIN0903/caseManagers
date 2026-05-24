@@ -36,6 +36,7 @@ import {
   deleteDocument,
 } from "@/lib/actions/documents";
 import { DOC_CATEGORIES } from "@/lib/case-constants";
+import { PreviewButton } from "@/components/file-preview";
 
 type Doc = NonNullable<
   Awaited<ReturnType<typeof getDocuments>>["data"]
@@ -208,8 +209,12 @@ export function DocumentsTab({ caseId }: { caseId: number }) {
                             </div>
                           </div>
                           <div className="flex gap-1 shrink-0">
-                            <a href={doc.file_url || "#"} download target="_blank" rel="noreferrer">
-                              <Button variant="ghost" size="icon" className="h-8 w-8" type="button">
+                            <PreviewButton url={doc.file_url || "#"} fileName={doc.file_name || ""} />
+                            <a
+                              href={`/api/download?file=${encodeURIComponent(doc.file_url || "")}&name=${encodeURIComponent(doc.file_name || "")}`}
+                              rel="noreferrer"
+                            >
+                              <Button variant="ghost" size="icon" className="h-8 w-8" type="button" title="下载">
                                 <Download className="h-4 w-4" />
                               </Button>
                             </a>
@@ -218,6 +223,7 @@ export function DocumentsTab({ caseId }: { caseId: number }) {
                               size="icon"
                               className="h-8 w-8 text-destructive"
                               onClick={() => handleDelete(doc.id)}
+                              title="删除"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
