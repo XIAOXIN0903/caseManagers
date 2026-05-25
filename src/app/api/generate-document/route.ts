@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     return new NextResponse(new Uint8Array(result.buffer), {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": `attachment; filename="${encodeURIComponent(result.fileName)}"`,
+        "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(result.fileName)}`,
       },
     });
   } catch {

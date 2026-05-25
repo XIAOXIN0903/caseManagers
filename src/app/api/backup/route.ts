@@ -61,7 +61,7 @@ export async function GET() {
     return new NextResponse(sqlDump, {
       headers: {
         "Content-Type": "application/sql; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${encodeURIComponent(fileName)}"`,
+        "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`,
       },
     });
   } catch (error) {

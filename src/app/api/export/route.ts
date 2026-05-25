@@ -62,10 +62,11 @@ export async function GET(request: NextRequest) {
           )
           .join("\n");
 
+      const csvFilename = `案件列表_${new Date().toISOString().split("T")[0]}.csv`;
       return new NextResponse("﻿" + csvContent, {
         headers: {
           "Content-Type": "text/csv; charset=utf-8",
-          "Content-Disposition": `attachment; filename="案件列表_${new Date().toISOString().split("T")[0]}.csv"`,
+          "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(csvFilename)}`,
         },
       });
     }
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse(buf, {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Content-Disposition": `attachment; filename="案件列表_${new Date().toISOString().split("T")[0]}.xlsx"`,
+        "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(`案件列表_${new Date().toISOString().split("T")[0]}.xlsx`)}`,
       },
     });
   } catch (error) {
