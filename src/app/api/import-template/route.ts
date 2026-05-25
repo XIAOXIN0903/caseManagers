@@ -57,11 +57,14 @@ export async function GET() {
 
   const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
 
+  const filename = "案件导入模板.xlsx";
+  const encodedFilename = encodeURIComponent(filename);
+
   return new NextResponse(buf, {
     headers: {
       "Content-Type":
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": `attachment; filename="案件导入模板.xlsx"`,
+      "Content-Disposition": `attachment; filename*=UTF-8''${encodedFilename}`,
     },
   });
 }
