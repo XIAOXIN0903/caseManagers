@@ -181,27 +181,21 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Check duplicates within the file
+    // Check duplicates within the file (only court_case_number must be unique)
     const seenCourt: Set<string> = new Set();
-    const seenFirm: Set<string> = new Set();
-    const duplicateRows: number[] = [];
+    const withinFileCourtDups = new Set<number>();
 
     for (const vr of validRows) {
       if (seenCourt.has(vr.data.court_case_number)) {
-        duplicateRows.push(vr.index);
-      }
-      if (seenFirm.has(vr.data.firm_case_number)) {
-        duplicateRows.push(vr.index);
+        withinFileCourtDups.add(vr.index);
       }
       seenCourt.add(vr.data.court_case_number);
-      seenFirm.add(vr.data.firm_case_number);
     }
 
-    // Check duplicates in database
+    // Check duplicates in database (only court_case_number must be unique)
     const dbDuplicates = await db
       .select({
         court_case_number: cases.court_case_number,
-        firm_case_number: cases.firm_case_number,
       })
       .from(cases)
       .where(isNull(cases.deleted_at));
@@ -209,11 +203,8 @@ export async function POST(request: NextRequest) {
     const dbCourtSet = new Set(
       dbDuplicates.map((d) => d.court_case_number).filter(Boolean) as string[]
     );
-    const dbFirmSet = new Set(
-      dbDuplicates.map((d) => d.firm_case_number).filter(Boolean) as string[]
-    );
 
-    // Filter out rows that have DB conflicts
+    // Filter out rows that have DB conflicts or file-internal duplicates
     const finalRows = validRows.filter((vr) => {
       if (dbCourtSet.has(vr.data.court_case_number)) {
         errors.push({
@@ -222,17 +213,10 @@ export async function POST(request: NextRequest) {
         });
         return false;
       }
-      if (dbFirmSet.has(vr.data.firm_case_number)) {
+      if (withinFileCourtDups.has(vr.index)) {
         errors.push({
           row: vr.index + 2,
-          message: `律所管理号"${vr.data.firm_case_number}"已存在`,
-        });
-        return false;
-      }
-      if (duplicateRows.includes(vr.index)) {
-        errors.push({
-          row: vr.index + 2,
-          message: "案号在导入文件中重复",
+          message: `法院案号"${vr.data.court_case_number}"在导入文件中重复`,
         });
         return false;
       }

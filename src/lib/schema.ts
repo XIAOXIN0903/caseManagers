@@ -19,7 +19,7 @@ const notDeleted = (table: { deleted_at: ReturnType<typeof text> }) =>
 export const cases = sqliteTable("cases", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   court_case_number: text("court_case_number").unique(),
-  firm_case_number: text("firm_case_number").unique(),
+  firm_case_number: text("firm_case_number"),
   case_type: text("case_type"),
   court_name: text("court_name"),
   our_party: text("our_party"),
