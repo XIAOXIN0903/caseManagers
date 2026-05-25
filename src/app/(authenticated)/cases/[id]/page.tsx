@@ -131,6 +131,16 @@ export default async function CaseDetailPage({
 
           <Card>
             <CardHeader>
+              <CardTitle>当事人信息</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <InfoRow label="我方当事人" value={c.our_party} />
+              <InfoRow label="对方当事人" value={c.opposing_party} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>对方律师信息</CardTitle>
             </CardHeader>
             <CardContent>

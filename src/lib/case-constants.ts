@@ -33,6 +33,8 @@ export const caseSchema = z.object({
   court_case_number: z.string().min(1, "必填"),
   firm_case_number: z.string().min(1, "必填"),
   case_type: z.string().optional().default(""),
+  our_party: z.string().optional().default(""),
+  opposing_party: z.string().optional().default(""),
   court_name: z.string().optional().default(""),
   presiding_judge: z.string().optional().default(""),
   judge_phone: z.string().optional().default(""),

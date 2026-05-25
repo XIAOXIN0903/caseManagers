@@ -30,6 +30,8 @@ export function CaseForm({ defaultValues, isEdit }: Props) {
     court_case_number: defaultValues?.court_case_number || "",
     firm_case_number: defaultValues?.firm_case_number || "",
     case_type: defaultValues?.case_type || "",
+    our_party: defaultValues?.our_party || "",
+    opposing_party: defaultValues?.opposing_party || "",
     court_name: defaultValues?.court_name || "",
     presiding_judge: defaultValues?.presiding_judge || "",
     judge_phone: defaultValues?.judge_phone || "",
@@ -140,6 +142,33 @@ export function CaseForm({ defaultValues, isEdit }: Props) {
               type="date"
               value={form.filing_date}
               onChange={(e) => update("filing_date", e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 当事人信息 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>当事人信息</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="our_party">我方当事人</Label>
+            <Input
+              id="our_party"
+              value={form.our_party}
+              onChange={(e) => update("our_party", e.target.value)}
+              placeholder="我方当事人姓名"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="opposing_party">对方当事人</Label>
+            <Input
+              id="opposing_party"
+              value={form.opposing_party}
+              onChange={(e) => update("opposing_party", e.target.value)}
+              placeholder="对方当事人姓名"
             />
           </div>
         </CardContent>

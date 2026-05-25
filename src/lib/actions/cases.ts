@@ -38,7 +38,9 @@ export async function getCases({
         or(
           like(cases.court_case_number, `%${search}%`),
           like(cases.firm_case_number, `%${search}%`),
-          like(cases.case_type, `%${search}%`)
+          like(cases.case_type, `%${search}%`),
+          like(cases.our_party, `%${search}%`),
+          like(cases.opposing_party, `%${search}%`)
         )
       );
     }

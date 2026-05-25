@@ -172,6 +172,8 @@ export function CasesList({
               <TableHead>法院案号</TableHead>
               <TableHead>律所编号</TableHead>
               <TableHead>案由</TableHead>
+              <TableHead>我方当事人</TableHead>
+              <TableHead>对方当事人</TableHead>
               <TableHead>状态</TableHead>
               <TableHead>法院</TableHead>
               <TableHead>立案日期</TableHead>
@@ -181,13 +183,13 @@ export function CasesList({
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                   加载中...
                 </TableCell>
               </TableRow>
             ) : items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                   暂无案件，请添加第一个案件
                 </TableCell>
               </TableRow>
@@ -203,6 +205,8 @@ export function CasesList({
                     {c.firm_case_number}
                   </TableCell>
                   <TableCell>{c.case_type}</TableCell>
+                  <TableCell>{c.our_party || "-"}</TableCell>
+                  <TableCell>{c.opposing_party || "-"}</TableCell>
                   <TableCell>
                     <Badge className={statusColors[c.status || "立案"] || ""} variant="outline">
                       {c.status}
@@ -258,7 +262,7 @@ export function CasesList({
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground mt-1">
-                {c.case_type} | {c.court_name}
+                {c.case_type} | {c.our_party || "-"} | {c.opposing_party || "-"} | {c.court_name}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 {c.firm_case_number} | {c.filing_date}

@@ -22,6 +22,8 @@ export const cases = sqliteTable("cases", {
   firm_case_number: text("firm_case_number").unique(),
   case_type: text("case_type"),
   court_name: text("court_name"),
+  our_party: text("our_party"),
+  opposing_party: text("opposing_party"),
   presiding_judge: text("presiding_judge"),
   judge_phone: text("judge_phone"),
   judge_assistant: text("judge_assistant"),
