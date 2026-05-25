@@ -27,6 +27,8 @@ interface ImportRow {
   filing_date: string;
   status: string;
   claim_amount: number;
+  our_party: string;
+  opposing_party: string;
   opposing_counsel: string;
   opposing_firm: string;
   opposing_phone: string;
@@ -79,6 +81,8 @@ export async function POST(request: NextRequest) {
       "立案日期": "filing_date",
       "案件状态": "status",
       "标的额": "claim_amount",
+      "我方当事人": "our_party",
+      "对方当事人": "opposing_party",
       "对方律师": "opposing_counsel",
       "对方律所": "opposing_firm",
       "对方电话": "opposing_phone",
@@ -155,6 +159,8 @@ export async function POST(request: NextRequest) {
           filing_date: String(row.filing_date || "").trim(),
           status,
           claim_amount: claimAmount,
+          our_party: String(row.our_party || "").trim(),
+          opposing_party: String(row.opposing_party || "").trim(),
           opposing_counsel: String(row.opposing_counsel || "").trim(),
           opposing_firm: String(row.opposing_firm || "").trim(),
           opposing_phone: String(row.opposing_phone || "").trim(),
@@ -263,6 +269,8 @@ export async function POST(request: NextRequest) {
             filing_date: d.filing_date || null,
             status: d.status,
             claim_amount: d.claim_amount || 0,
+            our_party: d.our_party || null,
+            opposing_party: d.opposing_party || null,
             opposing_counsel: d.opposing_counsel || null,
             opposing_firm: d.opposing_firm || null,
             opposing_phone: d.opposing_phone || null,
