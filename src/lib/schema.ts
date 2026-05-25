@@ -145,8 +145,7 @@ export const feeRecordsRelations = relations(feeRecords, ({ one }) => ({
 export const reminders = sqliteTable("reminders", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   case_id: integer("case_id")
-    .references(() => cases.id, { onDelete: "cascade" })
-    .notNull(),
+    .references(() => cases.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   reminder_date: text("reminder_date").notNull(),
   reminder_type: text("reminder_type").default("自定义"),

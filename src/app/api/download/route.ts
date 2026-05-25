@@ -33,13 +33,14 @@ export async function GET(request: NextRequest) {
     ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   };
 
-  // encode filename for Content-Disposition (RFC 5987)
+  const inline = request.nextUrl.searchParams.get("inline") === "1";
   const encodedName = encodeURIComponent(downloadName);
+  const disposition = inline ? "inline" : "attachment";
 
   return new NextResponse(buffer, {
     headers: {
       "Content-Type": mimeTypes[ext] || "application/octet-stream",
-      "Content-Disposition": `attachment; filename*=UTF-8''${encodedName}`,
+      "Content-Disposition": `${disposition}; filename*=UTF-8''${encodedName}`,
       "Content-Length": String(buffer.length),
     },
   });

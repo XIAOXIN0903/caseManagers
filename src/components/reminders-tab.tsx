@@ -49,6 +49,7 @@ const emptyForm = {
   reminder_type: "自定义",
   is_completed: 0,
   notes: "",
+  case_id: null as number | null,
 };
 
 export function RemindersTab({ caseId }: { caseId: number }) {
@@ -88,6 +89,7 @@ export function RemindersTab({ caseId }: { caseId: number }) {
       reminder_type: r.reminder_type || "自定义",
       is_completed: r.is_completed || 0,
       notes: r.notes || "",
+      case_id: r.case_id ?? null,
     });
     setDialogOpen(true);
   }

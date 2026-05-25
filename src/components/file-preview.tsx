@@ -8,27 +8,25 @@ interface PreviewButtonProps {
   fileName: string;
 }
 
+function isPreviewable(fileName: string) {
+  return /\.(pdf|png|jpe?g|gif|webp|bmp)$/i.test(fileName);
+}
+
 export function PreviewButton({ url, fileName }: PreviewButtonProps) {
+  function handlePreview() {
+    if (isPreviewable(fileName)) {
+      window.open(`/api/download?file=${encodeURIComponent(url)}&name=${encodeURIComponent(fileName)}&inline=1`, "_blank");
+    } else {
+      window.open(`/api/download?file=${encodeURIComponent(url)}&name=${encodeURIComponent(fileName)}`, "_blank");
+    }
+  }
+
   return (
     <Button
       variant="ghost"
       size="icon"
       className="h-8 w-8"
-      onClick={() => {
-        const w = window.open(url, "_blank");
-        // For images: show in white-background page for visibility
-        if (
-          !w &&
-          /\.(png|jpe?g|gif|webp|bmp)$/i.test(fileName || url)
-        ) {
-          // Fallback if popup blocked
-          const a = document.createElement("a");
-          a.href = url;
-          a.target = "_blank";
-          a.rel = "noopener noreferrer";
-          a.click();
-        }
-      }}
+      onClick={handlePreview}
       type="button"
       title="预览"
     >

@@ -16,6 +16,7 @@ const reminderSchema = z.object({
   reminder_type: z.string().optional().default("自定义"),
   is_completed: z.number().optional().default(0),
   notes: z.string().optional().default(""),
+  case_id: z.number().nullable().optional().default(null),
 });
 
 // ============================================================
@@ -47,9 +48,10 @@ export async function createReminder(
   await requireAuth();
   try {
     const parsed = reminderSchema.parse(input);
+    const { case_id: _, ...rest } = parsed;
     const result = await db
       .insert(reminders)
-      .values({ case_id: caseId, ...parsed })
+      .values({ case_id: caseId, ...rest })
       .returning();
     revalidatePath(`/cases/${caseId}`);
     revalidatePath("/dashboard");
@@ -74,9 +76,10 @@ export async function updateReminder(
   await requireAuth();
   try {
     const parsed = reminderSchema.parse(input);
+    const { case_id: _, ...rest } = parsed;
     const result = await db
       .update(reminders)
-      .set(parsed)
+      .set(rest)
       .where(and(eq(reminders.id, id), notDeleted(reminders)))
       .returning();
     if (result.length === 0) return { success: false, error: "提醒不存在" };
@@ -147,6 +150,67 @@ export async function deleteReminder(
 }
 
 // ============================================================
+// Standalone reminder (no case)
+// ============================================================
+export async function createStandaloneReminder(
+  input: { title: string; reminder_date: string; reminder_type?: string; notes?: string }
+): Promise<ActionResult<typeof reminders.$inferSelect>> {
+  await requireAuth();
+  try {
+    const result = await db
+      .insert(reminders)
+      .values({
+        case_id: null,
+        title: input.title,
+        reminder_date: input.reminder_date,
+        reminder_type: input.reminder_type || "自定义",
+        notes: input.notes || "",
+      })
+      .returning();
+    revalidatePath("/calendar");
+    revalidatePath("/dashboard");
+    return { success: true, data: result[0] };
+  } catch {
+    return { success: false, error: "操作失败，请重试" };
+  }
+}
+
+export async function updateStandaloneReminder(
+  id: number,
+  input: { title: string; reminder_date: string; reminder_type?: string; notes?: string; is_completed?: number }
+): Promise<ActionResult<typeof reminders.$inferSelect>> {
+  await requireAuth();
+  try {
+    const result = await db
+      .update(reminders)
+      .set(input)
+      .where(and(eq(reminders.id, id), notDeleted(reminders)))
+      .returning();
+    if (result.length === 0) return { success: false, error: "提醒不存在" };
+    revalidatePath("/calendar");
+    revalidatePath("/dashboard");
+    return { success: true, data: result[0] };
+  } catch {
+    return { success: false, error: "操作失败，请重试" };
+  }
+}
+
+export async function deleteStandaloneReminder(id: number): Promise<ActionResult> {
+  await requireAuth();
+  try {
+    await db
+      .update(reminders)
+      .set({ deleted_at: new Date().toISOString() })
+      .where(and(eq(reminders.id, id), notDeleted(reminders)));
+    revalidatePath("/calendar");
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch {
+    return { success: false, error: "操作失败，请重试" };
+  }
+}
+
+// ============================================================
 // Upcoming reminders (for dashboard and calendar)
 // ============================================================
 export async function getUpcomingReminders(limitCount = 5) {
@@ -159,13 +223,12 @@ export async function getUpcomingReminders(limitCount = 5) {
         case_court_number: cases.court_case_number,
       })
       .from(reminders)
-      .innerJoin(cases, eq(reminders.case_id, cases.id))
+      .leftJoin(cases, eq(reminders.case_id, cases.id))
       .where(
         and(
           gte(reminders.reminder_date, today),
           eq(reminders.is_completed, 0),
-          notDeleted(reminders),
-          notDeleted(cases)
+          notDeleted(reminders)
         )
       )
       .orderBy(reminders.reminder_date)
@@ -190,13 +253,12 @@ export async function getOverdueReminders() {
         case_court_number: cases.court_case_number,
       })
       .from(reminders)
-      .innerJoin(cases, eq(reminders.case_id, cases.id))
+      .leftJoin(cases, eq(reminders.case_id, cases.id))
       .where(
         and(
           lte(reminders.reminder_date, threeDaysFromNow),
           eq(reminders.is_completed, 0),
-          notDeleted(reminders),
-          notDeleted(cases)
+          notDeleted(reminders)
         )
       )
       .orderBy(reminders.reminder_date);
@@ -222,13 +284,12 @@ export async function getRemindersForMonth(year: number, month: number) {
         case_court_number: cases.court_case_number,
       })
       .from(reminders)
-      .innerJoin(cases, eq(reminders.case_id, cases.id))
+      .leftJoin(cases, eq(reminders.case_id, cases.id))
       .where(
         and(
           gte(reminders.reminder_date, startDate),
           lte(reminders.reminder_date, endDate),
-          notDeleted(reminders),
-          notDeleted(cases)
+          notDeleted(reminders)
         )
       )
       .orderBy(reminders.reminder_date);
