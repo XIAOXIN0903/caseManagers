@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -223,7 +222,7 @@ export default function CalendarPage() {
                 return (
                   <div
                     key={i}
-                    className={`min-h-[90px] sm:min-h-[110px] border-r border-b p-1 relative group ${
+                    className={`min-h-[100px] sm:min-h-[120px] border-r border-b p-1 relative group ${
                       i % 7 === 6 ? "border-r-0" : ""
                     } ${!day ? "bg-muted/30" : "cursor-pointer hover:bg-accent/50"}`}
                     onClick={() => day && openAddDialog(dateStr)}
@@ -254,69 +253,86 @@ export default function CalendarPage() {
                           </Button>
                         </div>
                         <div className="space-y-0.5">
-                          {dayReminders.slice(0, 3).map((r) => (
-                            <div key={r.reminder.id} className="flex items-center gap-0.5">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleToggleComplete(r);
-                                }}
-                                className="shrink-0"
-                                title={r.reminder.is_completed ? "标记未完成" : "标记完成"}
-                              >
-                                <div
-                                  className={`h-3 w-3 rounded border ${
-                                    r.reminder.is_completed
-                                      ? "bg-green-500 border-green-500 flex items-center justify-center"
-                                      : "border-muted-foreground"
-                                  }`}
+                          {dayReminders.slice(0, 4).map((r) => {
+                            const isStandalone = !r.reminder.case_id;
+                            const badgeCls = typeColors[r.reminder.reminder_type || "自定义"] || "";
+                            const completedCls = r.reminder.is_completed ? "line-through opacity-50" : "";
+                            const content = (
+                              <span className={`text-[10px] truncate block rounded px-1.5 py-0.5 border ${badgeCls} ${completedCls}`}>
+                                <span className="font-medium">{r.reminder.title}</span>
+                                {r.reminder.notes && (
+                                  <span className="text-[9px] text-muted-foreground ml-1">
+                                    {r.reminder.notes.length > 8
+                                      ? r.reminder.notes.slice(0, 8) + "…"
+                                      : r.reminder.notes}
+                                  </span>
+                                )}
+                              </span>
+                            );
+
+                            return (
+                              <div key={r.reminder.id} className="flex items-start gap-0.5">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleToggleComplete(r);
+                                  }}
+                                  className="shrink-0 mt-0.5"
+                                  title={r.reminder.is_completed ? "标记未完成" : "标记完成"}
                                 >
-                                  {r.reminder.is_completed === 1 && (
-                                    <Check className="h-2 w-2 text-white" />
+                                  <div
+                                    className={`h-3 w-3 rounded border ${
+                                      r.reminder.is_completed
+                                        ? "bg-green-500 border-green-500 flex items-center justify-center"
+                                        : "border-muted-foreground/50"
+                                    }`}
+                                  >
+                                    {r.reminder.is_completed === 1 && (
+                                      <Check className="h-2 w-2 text-white" />
+                                    )}
+                                  </div>
+                                </button>
+                                <div className="min-w-0 flex-1">
+                                  {isStandalone ? (
+                                    <div className="group/item flex items-center gap-0.5">
+                                      <button
+                                        className="min-w-0 flex-1 text-left"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleToggleComplete(r);
+                                        }}
+                                        title={r.reminder.notes || r.reminder.title}
+                                      >
+                                        {content}
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDelete(r);
+                                        }}
+                                        className="shrink-0 opacity-0 group-hover/item:opacity-100"
+                                        title="删除"
+                                      >
+                                        <Trash2 className="h-3 w-3 text-destructive" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <Link
+                                      href={`/cases/${r.reminder.case_id}`}
+                                      className="block min-w-0"
+                                      onClick={(e) => e.stopPropagation()}
+                                      title={r.reminder.notes || r.reminder.title}
+                                    >
+                                      {content}
+                                    </Link>
                                   )}
                                 </div>
-                              </button>
-                              {r.reminder.case_id ? (
-                                <Link
-                                  href={`/cases/${r.reminder.case_id}`}
-                                  className="block min-w-0 flex-1"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <Badge
-                                    className={`text-[10px] truncate w-full ${
-                                      typeColors[r.reminder.reminder_type || "自定义"] || ""
-                                    } ${r.reminder.is_completed ? "line-through opacity-50" : ""}`}
-                                    variant="outline"
-                                  >
-                                    {r.reminder.title}
-                                  </Badge>
-                                </Link>
-                              ) : (
-                                <div className="min-w-0 flex-1 flex items-center gap-0.5">
-                                  <span
-                                    className={`text-[10px] truncate px-2 py-0.5 rounded-full border ${
-                                      typeColors[r.reminder.reminder_type || "自定义"] || ""
-                                    } ${r.reminder.is_completed ? "line-through opacity-50" : ""}`}
-                                  >
-                                    {r.reminder.title}
-                                  </span>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDelete(r);
-                                    }}
-                                    className="shrink-0 opacity-0 group-hover:opacity-100"
-                                    title="删除"
-                                  >
-                                    <Trash2 className="h-3 w-3 text-destructive" />
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                          {dayReminders.length > 3 && (
+                              </div>
+                            );
+                          })}
+                          {dayReminders.length > 4 && (
                             <p className="text-[10px] text-muted-foreground pl-4">
-                              +{dayReminders.length - 3} 更多
+                              +{dayReminders.length - 4} 更多
                             </p>
                           )}
                         </div>
