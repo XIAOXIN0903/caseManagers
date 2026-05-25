@@ -141,12 +141,23 @@ export default function SettingsPage() {
     }
   }
 
-  function handleDownloadTemplate() {
-    const a = document.createElement("a");
-    a.href = "/api/import-template";
-    a.download = "案件导入模板.xlsx";
-    a.click();
-    toast.success("模板下载中...");
+  async function handleDownloadTemplate() {
+    try {
+      const res = await fetch("/api/import-template");
+      if (!res.ok) throw new Error("下载失败");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "案件导入模板.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success("模板下载成功");
+    } catch {
+      toast.error("模板下载失败，请稍后重试");
+    }
   }
 
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
